@@ -10,10 +10,10 @@ import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles({
   root: {
-    maxWidth: 345,
+    "maxWidth": "16rem",
   },
   media: {
-    height: 140,
+    "height" : "20vh"
   },
 });
 
@@ -25,26 +25,28 @@ const Toko = ({dataToko}) => {
         <Card className={classes.root}>
             <CardActionArea>
                 <CardMedia
-                className={classes.media}
-                image={dataToko.gambar}
-                title={dataToko.nama}
+                    className={classes.media}
+                    image={dataToko.gambar}
+                    title={dataToko.nama}
                 />
                 <CardContent>
-                <Typography gutterBottom variant="h5" component="h2">
-                    {dataToko.nama}
-                </Typography>
-                <Typography variant="body2" color="textSecondary" component="p">
-                    Alamat : {dataToko.jalan} &nbsp;, {dataToko.kecamatan} &nbsp;,
-                    {dataToko.provinsi}
-                </Typography>
+                    <Typography gutterBottom variant="h5" component="h2">
+                        {dataToko.nama}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" component="p">
+                        Alamat : {dataToko.jalan},{dataToko.kecamatan},
+                        {dataToko.provinsi}
+                    </Typography>
                 </CardContent>
-
-                <CardActions>
-                    <Button size="small" color="primary">
-                        Daftar Dorayaki
-                    </Button>
-                </CardActions>
             </CardActionArea>
+            <CardActions>
+                <Button size="small" color="primary">
+                    Daftar Dorayaki
+                </Button>
+                <Button size="small" color="primary">
+                    Edit Toko
+                </Button>
+            </CardActions>
         </Card>
     )
 }

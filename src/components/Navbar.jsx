@@ -1,6 +1,6 @@
 import React from 'react'
 import { Navbar, Container, Nav, OverlayTrigger} from 'react-bootstrap'
-import { IconButton} from "@material-ui/core"
+import { IconButton, Tooltip} from "@material-ui/core"
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import { Link } from 'react-router-dom'
@@ -17,13 +17,15 @@ const Navbarc = ({darkState, handleThemeChange}) => {
                         <Nav.Link as={Link} style={{ color: 'white' }} to="/dorayakis">Dorayaki</Nav.Link>
                     </Nav> 
                     <Nav className="ml-auto"></Nav>
-                    <IconButton style={{ color: 'white' }} aria-label="light/dark mode" onClick={handleThemeChange} component="span">
-                        {
-                            darkState ?
-                            <Brightness7Icon /> :
-                            <Brightness4Icon />
-                        }
-                    </IconButton>
+                    <Tooltip title="Toggle dark/light mode">
+                        <IconButton  style={{ color: 'white' }} aria-label="light/dark mode" onClick={handleThemeChange} component="span">
+                            {
+                                darkState ?
+                                <Brightness7Icon /> :
+                                <Brightness4Icon />
+                            }
+                        </IconButton>
+                    </Tooltip>
                 </Navbar.Collapse>
             </Container>
         </Navbar> 

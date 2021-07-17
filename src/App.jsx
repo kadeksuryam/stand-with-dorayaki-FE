@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import './App.css'
 import Navbarc from './components/Navbar'
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
-import { BrowserRouter, Switch } from 'react-router-dom'
+import { BrowserRouter, Switch, Route } from 'react-router-dom'
 import { Paper, Button } from "@material-ui/core"
 import {
   orange,
@@ -10,7 +10,7 @@ import {
   deepPurple,
   deepOrange
 } from "@material-ui/core/colors";
-import { TokoPage } from './pages/TokoPage'
+import TokoPage from './pages/TokoPage'
 
 function App() {
   const [darkState, setDarkState] = useState(false);
@@ -36,12 +36,7 @@ function App() {
       <BrowserRouter>
         <Navbarc darkState={darkState} handleThemeChange={handleThemeChange}/>
         <ThemeProvider theme={darkTheme}>
-          <Paper style={{height: "100vh"}}>
-            <div> Sample Text </div>
-            <Button variant="contained" color="primary">
-              Hello World
-            </Button>
-
+          <Paper style={{height: "auto"}}>
             <Switch>
               <Route path="/toko-dorayaki">
                 <TokoPage />
