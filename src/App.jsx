@@ -32,6 +32,17 @@ function App() {
     setDarkState(!darkState);
   };
 
+  const dataToko = [
+    {
+        "nama" : "Toko Serbaguna",
+        "jalan" : "Jalan Sudirman",
+        "kecamatan" : "Buleleng",
+        "kabupaten" : "Kabupaten Buleleng",
+        "provinsi" : "Bali",
+        "gambar" : "https://www.pngall.com/wp-content/uploads/8/Retail-Business-PNG-Free-Download.png"
+    }
+]
+
   return (
       <BrowserRouter>
         <Navbarc darkState={darkState} handleThemeChange={handleThemeChange}/>
@@ -39,7 +50,7 @@ function App() {
           <Paper style={{height: "auto"}}>
             <Switch>
               <Route path="/toko-dorayaki">
-                <TokoPage />
+                <TokoPage dataToko={dataToko}/>
               </Route>
             </Switch>
           </Paper>
