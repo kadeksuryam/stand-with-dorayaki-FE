@@ -17,7 +17,7 @@ function App() {
   const [darkState, setDarkState] = useState(false);
   const palletType = darkState ? "dark" : "light";
   const mainPrimaryColor = darkState ? orange[500] : lightBlue[500];
-  const mainSecondaryColor = darkState ? deepOrange[900] : deepPurple[500];
+  const mainSecondaryColor = darkState ? deepPurple[500] : deepOrange[900]
   const darkTheme = createTheme({
     palette: {
       type: palletType,
@@ -46,8 +46,8 @@ function App() {
 
   return (
       <BrowserRouter>
-        <Navbarc darkState={darkState} handleThemeChange={handleThemeChange}/>
         <ThemeProvider theme={darkTheme}>
+          <Navbarc darkState={darkState} handleThemeChange={handleThemeChange}/>
           <Paper style={{height: "auto"}}>
             <Switch>
               <Route path="/toko-dorayaki">

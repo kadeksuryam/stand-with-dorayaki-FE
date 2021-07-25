@@ -1,6 +1,5 @@
 import React from 'react'
-import { Navbar, Container, Nav, OverlayTrigger} from 'react-bootstrap'
-import { IconButton, Tooltip} from "@material-ui/core"
+import { IconButton, Tooltip, AppBar, Toolbar, Typography, Button, makeStyles} from "@material-ui/core"
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import { Link } from 'react-router-dom'
@@ -8,27 +7,25 @@ import { Link } from 'react-router-dom'
 
 const Navbarc = ({darkState, handleThemeChange}) => {
     return(
-        <Navbar sticky="top" collapseOnSelect expand="sm" bg={darkState ? "dark" : "primary"}>
-            <Container fluid>
-                <Navbar.Brand style={{ color: 'white' }} as={Link} to='/toko-dorayakis'>Stand with Dorayaki</Navbar.Brand>
-                <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-                <Navbar.Collapse id="responsive-navbar-nav">
-                    <Nav className="mr-auto">
-                        <Nav.Link as={Link} style={{ color: 'white' }} to="/dorayakis">Dorayaki</Nav.Link>
-                    </Nav> 
-                    <Nav className="ml-auto"></Nav>
-                    <Tooltip title="Toggle dark/light mode">
-                        <IconButton  style={{ color: 'white' }} aria-label="light/dark mode" onClick={handleThemeChange} component="span">
-                            {
-                                darkState ?
-                                <Brightness7Icon /> :
-                                <Brightness4Icon />
-                            }
-                        </IconButton>
-                    </Tooltip>
-                </Navbar.Collapse>
-            </Container>
-        </Navbar> 
+        <AppBar color="secondary" position="static">
+            <Toolbar>
+                <div style={{flexGrow: 1}}>
+                    <Button component={Link} to="/toko-dorayaki">
+                        Stand with Dorayaki
+                    </Button>
+                </div>
+                <Button component={Link} to="/dorayaki">Dorayaki</Button>
+                <Tooltip title="Toggle dark/light mode">
+                    <IconButton aria-label="light/dark mode" onClick={handleThemeChange} component="span">
+                        {
+                            darkState ?
+                            <Brightness7Icon /> :
+                            <Brightness4Icon />
+                        }
+                    </IconButton>
+                </Tooltip>    
+            </Toolbar>
+        </AppBar>
     )
 }
 
