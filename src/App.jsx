@@ -11,6 +11,7 @@ import {
   deepOrange
 } from "@material-ui/core/colors";
 import TokoPage from './pages/TokoPage'
+import TokoStokPage from './pages/TokoStokPage'
 
 function App() {
   const [darkState, setDarkState] = useState(false);
@@ -51,6 +52,9 @@ function App() {
             <Switch>
               <Route path="/toko-dorayaki">
                 <TokoPage dataToko={dataToko}/>
+              </Route>
+              <Route path="/toko-dorayaki-stok">
+                <TokoStokPage/>
               </Route>
             </Switch>
           </Paper>
