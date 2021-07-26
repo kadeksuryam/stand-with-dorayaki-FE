@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './App.css'
 import Navbarc from './components/Navbar'
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
@@ -12,6 +12,9 @@ import {
 } from "@material-ui/core/colors";
 import TokoPage from './pages/TokoPage'
 import TokoStokPage from './pages/TokoStokPage'
+import { API_BASE_URL } from './utils/config'
+import axios from 'axios'
+import Notification from './components/Notification'
 
 function App() {
   const [darkState, setDarkState] = useState(false);
@@ -33,25 +36,41 @@ function App() {
     setDarkState(!darkState);
   };
 
-  const dataToko = [
-    {
-        "nama" : "Toko Serbaguna",
-        "jalan" : "Jalan Sudirman",
-        "kecamatan" : "Buleleng",
-        "kabupaten" : "Kabupaten Buleleng",
-        "provinsi" : "Bali",
-        "gambar" : "https://www.pngall.com/wp-content/uploads/8/Retail-Business-PNG-Free-Download.png"
+  const [dataTokos, setDataTokos] = useState([])
+
+  useEffect(() => {
+    const getDataToko = async () => {
+      try{
+        const resDataTokos = (await axios.get(API_BASE_URL + '/toko-dorayakis')).data
+        setDataTokos(resDataTokos)
+      } catch(err){
+        console.log(err.message)
+      }
     }
-]
+    getDataToko()
+  }, [])
+
+  const syncDataTokos = async () => {
+    try{
+      const resDataTokos = (await axios.get(API_BASE_URL + '/toko-dorayakis')).data
+      setDataTokos(resDataTokos)
+    } catch(err){
+      console.log(err.message)
+    }
+  }
+
+  const [notif, setNotif] = useState({open: false, type: "", msg: ""})
 
   return (
       <BrowserRouter>
+        <Notification notif={notif} setNotif={setNotif} />
         <ThemeProvider theme={darkTheme}>
           <Navbarc darkState={darkState} handleThemeChange={handleThemeChange}/>
           <Paper style={{height: "auto"}}>
             <Switch>
               <Route path="/toko-dorayaki">
-                <TokoPage dataToko={dataToko}/>
+                <TokoPage dataTokos={dataTokos} syncDataTokos={syncDataTokos} 
+                  notif={notif} setNotif={setNotif}/>
               </Route>
               <Route path="/toko-dorayaki-stok">
                 <TokoStokPage/>
