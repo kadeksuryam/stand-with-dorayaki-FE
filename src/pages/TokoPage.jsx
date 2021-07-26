@@ -1,13 +1,12 @@
 import React, {useEffect, useState} from 'react'
 import Toko from '../components/Toko'
-import { Pagination } from '@material-ui/lab'
 import { Grow, Paper, IconButton, InputBase, Divider, Collapse, Box, FormGroup, FormControlLabel, Switch } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import SearchIcon from '@material-ui/icons/Search'
 import SettingsIcon from '@material-ui/icons/Settings'
 import CloseIcon from '@material-ui/icons/Close';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -19,10 +18,13 @@ import { getProvinsi, getKabupaten, getKecamatan } from '../utils/fetchDataDaera
 import AddIcon from '@material-ui/icons/Add';
 import useQuery from '../utils/useQuery'
 import { useLocation, useHistory } from 'react-router-dom'
+import { API_BASE_URL } from '../utils/config'
+import axios from 'axios'
+
 const searchBarStyles = makeStyles((theme) => ({
     root: {
       padding: '2px 4px',
-      margin: '1rem auto',
+      margin: '0rem auto',
       display: 'flex',
       alignItems: 'center',
       maxWidth: '400px',
@@ -40,11 +42,20 @@ const searchBarStyles = makeStyles((theme) => ({
     },
   }));
 
+      
+const stylesPar = {
+    "display": "flex",
+    "justifyContent": "flex-start",
+    "flexWrap" : "wrap",
+    "minHeight" : "60vh"
+}
 
-const AddDialog = () => {
+const AddDialog = ({syncDataTokos, notif, setNotif}) => {
     const [open, setOpen] = useState(false)
     const [addField, setAddField] = useState({})
     const [dataDaerah, setDataDaerah] = useState({"provinsi" : [], "kabupaten" : [], "kecamatan" : []})
+    const [addOps, setAddOps] = useState(false)
+    
 
     const handleClickOpen = () => {
         setOpen(true)
@@ -52,47 +63,105 @@ const AddDialog = () => {
     
     const handleClose = () => {
         setOpen(false)
+        setAddField({nama: "", provinsi: "", kabupaten: "", kecamatan: "", jalan: ""})
     }
 
     useEffect(() => {
         const fetchDataProvinsi = async () => {
             const resProvinsi = await getProvinsi()
             setDataDaerah({...dataDaerah, "provinsi" : resProvinsi})
+            setAddField({nama: "", provinsi: "", kabupaten: "", kecamatan: "", jalan: ""})
         }
         fetchDataProvinsi()
-    }, [])
+    }, [open])
 
-    const handleOnDataDaerahChange = async (event, val, reason) => {
-        const inputId = (event.target.id)
-        const key = inputId.substr(0,(inputId).indexOf("-option-"))
-        if(key === "provinsi"){
-            if(reason === "clear"){
-                setAddField({...addField, provinsi: "", kabupaten: "", kecamatan: ""})
-            }
-            else if(val){
-                const resKab = await getKabupaten(val.id)
-                setAddField({...addField, provinsi : val.nama, kabupaten : "", kecamatan: ""})
-                setDataDaerah({...dataDaerah, "kabupaten" : resKab})
+    const handleOnProvinsiChange = async (event, val, reason) => {
+        if(reason === "clear"){
+            setAddField({...addField, provinsi: "", kabupaten: "", kecamatan: ""})
+        }
+        else if(val){
+            try{
+                const res = await getKabupaten(val.id)
+                setAddField({...addField, provinsi: val.nama, kabupaten : "", kecamatan : ""})
+                setDataDaerah({...dataDaerah, "kabupaten": res})
+            }catch(err){
+                let errMsg = err.message.toString()
+                if(err.response)
+                    if(err.response.data.error)
+                         errMsg = err.response.data.error
+                setNotif({...notif, open: true, type: "error", msg: errMsg})
             }
         }
-        else if(key === "kabupaten"){
-            if(reason === "clear"){
-                setAddField({...addField, kabupaten: "", kecamatan: ""})
-            }
-            else if(val){
-                const resKec = await getKecamatan(val.id)
-                setAddField({...addField, kabupaten: val.nama, kecamatan: ""})
-                setDataDaerah({...dataDaerah, "kecamatan" : resKec})
+    }
+
+    const handleOnKabupatenChange = async (event, val, reason) => {
+        if(reason === "clear"){
+            setAddField({...addField, kabupaten: "", kecamatan: ""})
+        }
+        else if(val){
+            try{
+                const res = await getKecamatan(val.id)
+                setAddField({...addField, kabupaten : val.nama, kecamatan : ""})
+                setDataDaerah({...dataDaerah, "kecamatan": res})
+            }catch(err){
+                let errMsg = err.message.toString()
+                if(err.response)
+                    if(err.response.data.error)
+                         errMsg = err.response.data.error
+                setNotif({...notif, open: true, type: "error", msg: errMsg})
             }
         }
-        else if(key === "kecamatan"){
-            if(reason === "clear"){
-                setAddField({...addField, kecamatan: ""})
-            }
-            else if(val) setAddField({...addField, kecamatan: val.nama})
+    }
+
+    const handleOnKecamatanChange = (event, val, reason) => {
+        if(reason === "clear"){
+            setAddField({...addField, kecamatan: ""})
+        }
+        else if(val){
+            setAddField({...addField, kecamatan: val.nama})
         }
     }
     
+    const checkAddFieldChanged = () => {
+        return !(
+            addField.nama === "" &&
+            addField.provinsi === "" &&
+            addField.kabupaten === "" &&
+            addField.kecamatan === "" &&
+            addField.jalan  === "" &&
+            !(addField.pngFile)
+        )
+    }
+    const handleAdd = async () => {
+        setAddOps(true)
+        try{
+            const addURL = API_BASE_URL + `/toko-dorayakis/`
+            const {nama, jalan, kabupaten, kecamatan, provinsi, pngFile} = addField
+
+            const formData = new FormData()
+            if(nama) formData.append("nama", nama)
+            if(jalan) formData.append("jalan", jalan)
+            if(kabupaten) formData.append("kabupaten", kabupaten)
+            if(kecamatan) formData.append("kecamatan", kecamatan)
+            if(provinsi) formData.append("provinsi", provinsi)
+            if(pngFile) formData.append("gambar", pngFile)
+
+            await axios.post(addURL, formData)
+            await syncDataTokos()
+            setNotif({...notif, open: true, type: "success", msg: "toko berhasil ditambahkan!"})
+            setOpen(false)
+        }catch(err){
+            let errMsg = err.message.toString()
+            if(err.response)
+                if(err.response.data.error)
+                     errMsg = err.response.data.error
+            setNotif({...notif, open: true, type: "error", msg: errMsg})
+        }
+        finally{
+            setAddOps(false)
+        }
+    }
+
     return(
         <div style={{display: "grid", "maxWidth" : "7rem",  margin: "1rem auto"}}>
             <Button size="small" variant="contained" color="primary"
@@ -106,47 +175,76 @@ const AddDialog = () => {
                 Silahkan tambahkan toko dengan data yang benar.
                 </DialogContentText>
                 <TextField autoFocus 
+                    value={addField.nama}
                     style={{ maxWidth: 400 }} margin="dense" label="Nama" type="text" 
                     fullWidth  variant="outlined"
                     onChange={(e) => setAddField({...addField, "nama" : e.target.value})}
                 />
                 <Autocomplete
-                    id="provinsi"
+                    value={{nama: addField.provinsi}}
                     options={dataDaerah["provinsi"]}
-                    getOptionLabel={(option) => option.nama}
+                    getOptionSelected={(option, value) => value.nama ? (option.nama === value.nama) : true}
+                    getOptionLabel={(option) => option.nama ? option.nama : ''}
                     style={{ maxWidth: 400 }}
-                    onChange={handleOnDataDaerahChange}
+                    onChange={handleOnProvinsiChange}
                     renderInput={(params) => <TextField {...params} margin="dense" fullWidth label="Provinsi" variant="outlined" />}
                 />
                 <Autocomplete
-                    id="kabupaten"
+                    value={{nama: addField.kabupaten}}
                     options={dataDaerah["kabupaten"]}
-                    getOptionLabel={(option) => option.nama}
+                    getOptionSelected={(option, value) => value.nama ? (option.nama === value.nama) : true}
+                    getOptionLabel={(option) => option.nama ? option.nama : ''}
                     style={{ maxWidth: 400 }}
-                    onChange={handleOnDataDaerahChange}
+                    onChange={handleOnKabupatenChange}
                     renderInput={(params) => <TextField {...params} margin="dense" fullWidth label="Kabupaten" variant="outlined" />}
                 />
                 <Autocomplete
-                    id="kecamatan"
+                    value={{nama: addField.kecamatan}}
                     options={dataDaerah["kecamatan"]}
-                    getOptionLabel={(option) => option.nama}
+                    getOptionSelected={(option, value) => value.nama ? (option.nama === value.nama) : true}
+                    getOptionLabel={(option) => option.nama ? option.nama : ''}
                     style={{ maxWidth: 400 }}
-                    onChange={handleOnDataDaerahChange}
+                    onChange={handleOnKecamatanChange}
                     renderInput={(params) => <TextField {...params} margin="dense" fullWidth label="Kecamatan" variant="outlined" />}
                 />
-                <TextField 
+                <TextField
+                    value={addField.jalan} 
                     style={{ maxWidth: 400 }} margin="dense" label="Jalan" type="text" 
                     fullWidth  variant="outlined"
                     onChange={(e) => setAddField({...addField, "jalan" : e.target.value})}
                 />
+                <div>
+                    Gambar
+                    <div style={{display: "grid"}}> 
+                        <input
+                            accept="image/png"
+                            type="file"
+                            onChange={(e) => setAddField({...addField, pngFile: e.target.files[0]})}
+                        />
+                    </div>
+                </div>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose} color="primary">
-                Cancel
+                    Cancel
                 </Button>
-                <Button onClick={handleClose} color="primary">
-                Add
-                </Button>
+                {
+                    !addOps
+                        ?
+                        checkAddFieldChanged()
+                            ?
+                                <Button onClick={handleAdd} variant="contained" color="primary" autoFocus>
+                                    Add
+                                </Button> 
+                            :
+                                <Button onClick={handleAdd} disabled variant="contained" color="primary" autoFocus>
+                                    Add
+                                </Button> 
+                        : 
+                            <Button onClick={handleAdd} disabled variant="contained" color="primary" autoFocus>
+                                <CircularProgress size={20}/> Adding...
+                            </Button>
+                }
             </DialogActions>
             </Dialog>
       </div>
@@ -155,17 +253,17 @@ const AddDialog = () => {
 
 
 
-const TokoPage = ({dataToko}) => {
+const TokoPage = ({dataTokos, syncDataTokos, notif, setNotif}) => {
     const history = useHistory()
     const location = useLocation()
     const currLocation = location.pathname
     let query = useQuery()
 
     /* Handle Search Query */
-    let filteredToko = [...dataToko]
+    let filteredToko = [...dataTokos]
     let currSearchQuery = (query.get("q") || "").trim()
-    let currStateSetting = { nama: true, jalan: false, kecamatan: false, provinsi: false }
-    const settingSearchAttribute = ["nama", "jalan", "kecamatan", "provinsi"]
+    let currStateSetting = { nama: true, jalan: false, kecamatan: false, kabupaten: false, provinsi: false }
+    const settingSearchAttribute = ["nama", "jalan", "kecamatan", "kabupaten", "provinsi"]
 
     if(currSearchQuery.length != 0){
         const searchMethods = (query.get("sm") || "").trim().split('|').map(met => met.trim()).filter(q => settingSearchAttribute.includes(q))
@@ -174,7 +272,7 @@ const TokoPage = ({dataToko}) => {
             let tmpFilteredToko = []
             for(const searchMethod of searchMethods){
                 currStateSetting[searchMethod] = true
-                tmpFilteredToko = tmpFilteredToko.concat(filteredToko.filter(toko => toko[searchMethod].toLowerCase().includes(currSearchQuery)))
+                tmpFilteredToko = tmpFilteredToko.concat(filteredToko.filter(toko => toko[searchMethod].toLowerCase().includes(currSearchQuery.toLowerCase())))
             }
             filteredToko = tmpFilteredToko
         }
@@ -188,31 +286,6 @@ const TokoPage = ({dataToko}) => {
     const [settingButton, setSettingButton] = useState(true)
     const handleSetting = () => setSettingButton(!settingButton)
 
-    /* Handle Page Query */
-    const MAX_TOKO_PER_PAGE = 5
-    const cntPage = Math.ceil(filteredToko.length/MAX_TOKO_PER_PAGE)
-    const currPage = parseInt(query.get("page")) || 1
-    const startIdx = (currPage-1)*MAX_TOKO_PER_PAGE
-    const endIdx = startIdx+MAX_TOKO_PER_PAGE-1
-   
-    filteredToko = filteredToko.filter((toko, idx) => (idx >= startIdx && idx <= endIdx))
-    const [tokosLoaded, setTokosLoaded] = useState(true)
-    const handlePageChange = (event, val) => {
-        setTokosLoaded(false)
-        setTimeout(() => {
-            history.push(currLocation+'?page='+val)
-            setTokosLoaded(true)
-        }, 1000)
-    }
-    
-    
-    const stylesPar = {
-        "display": "flex",
-        "justifyContent": "flex-start",
-        "flexWrap" : "wrap"
-    }
-
-
     const searchBarClasses = searchBarStyles()
 
     const handleSearch = () => {
@@ -224,7 +297,9 @@ const TokoPage = ({dataToko}) => {
             searchMethods = searchMethods.join('|')
             history.push(currLocation+`?q=${searchQuery}`+`&sm=${searchMethods}`)            
         }
-        else console.log('setting method must be provided')
+        else{
+            setNotif({...notif, open: true, type: "error", msg: "setting method must be provided"})
+        }
     }
     const handleSearchSubmit = (e) => {
         e.preventDefault()
@@ -255,7 +330,7 @@ const TokoPage = ({dataToko}) => {
                         </IconButton> 
                 }
             </Paper>
-            <AddDialog />
+            <AddDialog syncDataTokos={syncDataTokos} notif={notif} setNotif={setNotif}/>
             <Collapse in={!settingButton}>
                     <Paper style={{margin: "1rem"}}>
                         <Box textAlign="center" fontWeight="fontWeightBold" fontSize="h6.fontSize">Pencarian Toko Berdasarkan:</Box>
@@ -288,9 +363,13 @@ const TokoPage = ({dataToko}) => {
                     {
                         filteredToko.map((toko, idx) => (
                             <div key={idx}>
-                                <Grow in={tokosLoaded} key={idx} timeout={500 + 100*idx}>
+                                <Grow in={true} key={idx} timeout={500 + 100*idx}>
                                     <Paper elevation={10} key={idx} style={{"margin" : "1rem"}}>
-                                        <Toko key={idx} dataToko={toko}/>
+                                        <Toko key={idx} dataToko={toko} 
+                                            syncDataTokos={syncDataTokos}
+                                            notif={notif}
+                                            setNotif={setNotif}
+                                        />
                                     </Paper>
                                 </Grow>
                             </div>
@@ -298,10 +377,6 @@ const TokoPage = ({dataToko}) => {
                     }
                 </div>
             } 
-
-            <div style={{"margin" : "0 auto"}}>
-                <Pagination count={cntPage} page={currPage} variant="outlined" color="primary" onChange={handlePageChange} />
-            </div>
         </>
     )
 }
