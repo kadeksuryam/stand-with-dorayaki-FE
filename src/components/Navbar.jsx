@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 
 const Navbarc = ({darkState, handleThemeChange}) => {
     return(
-        <AppBar color="secondary" position="static">
+        <AppBar color="secondary" position="sticky">
             <Toolbar>
                 <div style={{flexGrow: 1}}>
                     <Button component={Link} to="/toko-dorayaki">
