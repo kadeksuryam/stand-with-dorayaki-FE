@@ -306,6 +306,10 @@ const TokoPage = ({dataTokos, syncDataTokos, notif, setNotif}) => {
         handleSearch()
     }
 
+    const changeRoute = (route) => {
+        history.push(route)
+    }
+
     return (
         <>
             <Paper component="form" onSubmit={handleSearchSubmit} className={searchBarClasses.root}>
@@ -369,6 +373,7 @@ const TokoPage = ({dataTokos, syncDataTokos, notif, setNotif}) => {
                                             syncDataTokos={syncDataTokos}
                                             notif={notif}
                                             setNotif={setNotif}
+                                            changeRoute={changeRoute}
                                         />
                                     </Paper>
                                 </Grow>
