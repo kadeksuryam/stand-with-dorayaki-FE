@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import { useHistory } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import clsx from 'clsx';
@@ -137,7 +138,7 @@ const EditDialog = ({dataToko, syncDataTokos, notif, setNotif}) => {
             const updateURL = API_BASE_URL + `/toko-dorayakis/${dataToko._id}`
             const {nama, jalan, kabupaten, kecamatan, provinsi, pngFile} = editField
 
-            const formData = new FormData()
+            let formData = new FormData()
             if(nama) formData.append("nama", nama)
             if(jalan) formData.append("jalan", jalan)
             if(kabupaten) formData.append("kabupaten", kabupaten)
@@ -330,15 +331,20 @@ const DeleteDialog = ({dataToko, syncDataTokos, notif, setNotif}) => {
     )
 }
 
-const Toko = ({dataToko, syncDataTokos, notif, setNotif}) => {
+const Toko = ({dataToko, syncDataTokos, notif, setNotif, changeRoute}) => {
     const classes = useStyles()
+
     const [showDetails, setShowDetails] = useState(false)
 
     const handleShowDetails = () => setShowDetails(!showDetails)
 
+    const handleTokoStok = () => {
+        changeRoute(`/toko-dorayaki/stok/${dataToko._id}`)
+    }
+
     return(
         <Card className={classes.root}>
-            <CardActionArea style={{height: "33vh"}}>
+            <CardActionArea onClick={handleTokoStok} style={{height: "33vh"}}>
                 <CardMedia
                     className={classes.media}
                     image={API_BASE_URL + dataToko.gambar}
