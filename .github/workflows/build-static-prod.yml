@@ -1,0 +1,25 @@
+on:
+  push:
+    branches:
+      - master
+jobs:
+  pull-and-build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: update production static files
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd stand-with-dorayaki-FE/
+          git pull
+          npm install
+          npm run build
+          cp -a ./dist ../stand-with-dorayaki-BE/
+          cd ../stand-with-dorayaki-BE/
+          sudo docker-compose down
+          sudo docker-compose build
+          sudo docker-compose up -d
