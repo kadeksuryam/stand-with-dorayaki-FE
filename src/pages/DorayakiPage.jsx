@@ -60,7 +60,7 @@ const AddDialog = ({syncDataDorayakis, notif, setNotif}) => {
 
             const formData = new FormData()
             if(rasa) formData.append("rasa", rasa)
-            if(deskripsi) formData.append("deksripsi", deskripsi)
+            if(deskripsi) formData.append("deskripsi", deskripsi)
             if(pngFile) formData.append("gambar", pngFile)
 
             await axios.post(addURL, formData)
