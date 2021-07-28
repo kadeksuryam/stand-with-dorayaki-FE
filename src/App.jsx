@@ -42,7 +42,7 @@ function App() {
 
   const [dataTokos, setDataTokos] = useState([])
   const [dataDorayakis, setDataDorayakis] = useState([])
-
+  
   useEffect(() => {
     const getDataToko = async () => {
       try{
@@ -106,7 +106,9 @@ function App() {
                   />
               </Route>
               <Route path="/toko-dorayaki/stok/:id">
-                <TokoStokPage notif={notif} setNotif={setNotif}/>
+                <TokoStokPage 
+                  dataTokos={dataTokos}
+                  notif={notif} setNotif={setNotif}/>
               </Route>
               <Route path="/toko-dorayaki">
                 <TokoPage dataTokos={dataTokos} syncDataTokos={syncDataTokos} 
